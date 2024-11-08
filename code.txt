@@ -1,0 +1,63 @@
+flowchart TD
+    Start([Start]) --> Input[Input Parameters]
+    
+    subgraph Inputs
+        Input --> |Collect| Data[/"
+            - Street Name
+            - Beginning Location
+            - End Location
+            - Cut Length ft
+            - Cut Width ft
+            - Distance from Start ft
+            - Cut Year
+            - Inflation Rate %
+        "/]
+    end
+    
+    Data --> GetRoad[Get Road Information]
+    GetRoad --> RoadFound{Road Found?}
+    
+    RoadFound -->|No| NoRoad[Display 'No Road Found']
+    RoadFound -->|Yes| CalcArea[Calculate Section Area]
+    
+    CalcArea --> CutSize{Determine Cut Size}
+    CutSize -->|"Area ≥ 10% of Total"| LargeCut[Set as 'Large Cut']
+    CutSize -->|"Area < 10% of Total"| SmallCut[Set as 'Small Cut']
+    
+    LargeCut --> RoadType{Check Road Type}
+    SmallCut --> RoadType
+    
+    RoadType -->|Arterial/Collector| ArterialPCI{Check PCI}
+    RoadType -->|Residential| ResPCI{Check PCI}
+    
+    ArterialPCI -->|"PCI ≥ 70"| HighArterial["Base Fee Schedule:
+        Small: $1.00/sqft
+        Large: $4.50/sqft"]
+    ArterialPCI -->|"PCI < 70"| LowArterial["Base Fee Schedule:
+        Small: $0.50/sqft
+        Large: $0.50/sqft"]
+    
+    ResPCI -->|"PCI ≥ 50"| HighRes["Base Fee Schedule:
+        Small: $1.50/sqft
+        Large: $4.00/sqft"]
+    ResPCI -->|"PCI < 50"| LowRes["Base Fee Schedule:
+        Small: $0.25/sqft
+        Large: $0.50/sqft"]
+    
+    HighArterial --> AdjustRate[Apply Inflation Factor]
+    LowArterial --> AdjustRate
+    HighRes --> AdjustRate
+    LowRes --> AdjustRate
+    
+    AdjustRate --> |"Rate × (1 + inflation%)^(cut_year - current_year)"| CalcFee[Calculate Total Fee]
+    
+    CalcFee --> Results["Display Results:
+        - Road Details
+        - Fee Category
+        - Base Rate per sqft
+        - Adjusted Rate per sqft
+        - Total Fee"]
+    
+    Results --> End([End])
+    
+    NoRoad --> End
